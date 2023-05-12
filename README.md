@@ -1,6 +1,4 @@
-# low-risk-reports
-
-# Low Risk
+# Low Risk Reports
 
 ## 1. Don’t use `payable.transfer()`/`payable.send()`
 

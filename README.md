@@ -154,72 +154,7 @@ Recommended Mitigation Steps:
 <br>
 <hr>
 
-## 8. Typos
-
-Example:
-
-```java
-/// @audit usefull
-60:           uint256 nonce; // nonce of order usefull for cancelling in bulk
-```
-
-<br>
-<hr>
-
-## 9. NatSpec is incomplete
-
-```java
-File: contracts/core/GolomTrader.sol
-
-/// @audit Missing: '@return'
-162       ///      OrderStatus = 3 , valid order
-163       /// @param o the Order struct to be validated
-164       function validateOrder(Order calldata o)
-165           public
-166           view
-167           returns (
-168               uint256,
-169               bytes32,
-170:              uint256
-
-/// @audit Missing: '@param tokenId'
-/// @audit Missing: '@param proof'
-328       /// @dev function to fill a signed order of ordertype 2 also has a payment param in case the taker wants
-329       ///      to send ether to that address on filling the order, Match an criteria order, ensuring that the supplied proof demonstrates inclusion of the tokenId in the associated merkle root, if root is 0 then any token can be used to fill the order
-330       /// @param o the Order struct to be filled must be orderType 2
-331       /// @param amount the amount of times the order is to be filled(useful for ERC1155)
-332       /// @param referrer referrer of the order
-333       /// @param p any extra payment that the taker of this order wanna send on succesful execution of order
-334       function fillCriteriaBid(
-335           Order calldata o,
-336           uint256 amount,
-337           uint256 tokenId,
-338           bytes32[] calldata proof,
-339           address referrer,
-340           Payment calldata p
-341:      ) public nonReentrant {
-```
-
-## 9.1 Missing NatSpec in file.
-
-<br>
-<hr>
-
-## 10. Inconsistent spacing in comments
-
-_Some lines use `// x` and some use `//x`. The instances below point out the usages that don’t follow the majority, within each file_
-
-Example:
-
-```java
-File: contracts/core/GolomTrader.sol
-181:          //deadline
-
-File: contracts/rewards/RewardDistributor.sol
-99:           //console.log(block.timestamp,epoch,fee);
-```
-
-## 11. Missing checks for `address(0x0)` (zero-address) when assigning values to `address` state variables
+## 8. Missing checks for `address(0x0)` (zero-address) when assigning values to `address` state variables
 
 _Missing checks for zero-addresses may lead to infunctional protocol, if the variable addresses are updated incorrectly._
 Example:
@@ -266,7 +201,7 @@ Recommended Mitigation Steps:
 <br>
 <hr>
 
-## 12. The Contract Should `approve(0)`/`safeApprove()` first - A second call to the function may revert
+## 9. The Contract Should `approve(0)`/`safeApprove()` first - A second call to the function may revert
 
 _Some ERC20 tokens, such as Tether, `revert()` if `approve()` is called a second time without having called `approve(0)` first_
 
@@ -289,13 +224,41 @@ IERC20(token).safeApprove(address(operator), amount);
 <br>
 <hr>
 
-## 13. Chainlink's VRF V1 is deprecated
+## 10. Chainlink's VRF V1 is deprecated
 
 _VRF V1 is [deprecated](https://docs.chain.link/vrf/v1/introduction), so new projects should not use it._
 
 ```java
 13   /// @notice RandProvider wrapper around Chainlink VRF v1.
 14:  contract ChainlinkV1RandProvider is RandProvider, VRFConsumerBase {
+```
+
+<br>
+<hr>
+
+## 11. `safeApprove()` is deprecated.
+
+_[Deprecated](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/bfff03c0d2a59bcd8e2ead1da9aed9edf0080d05/contracts/token/ERC20/utils/SafeERC20.sol#L38-L45) in favor of safeIncreaseAllowance() and safeDecreaseAllowance(). If only setting the initial allowance to the value that means infinite, safeIncreaseAllowance() can be used instead. The function may currently work, but if a bug is found in this version of OpenZeppelin, and the version that you're forced to upgrade to no longer has this function, you'll encounter unnecessary delays in porting and testing replacement contracts._
+
+Example:
+
+```java
+322:          token.safeApprove(address(vToken), 0);
+
+323:          token.safeApprove(address(vToken), amountToSupply);
+```
+
+## 12. External calls in an un-bounded `for-`loop may result in a DOS.
+
+_Consider limiting the number of iterations in `for-`loops that make external calls._
+
+[Example](https://github.com/code-423n4/2023-05-venus/blob/9853f6f4fe906b635e214b22de9f627c6a17ba5b/contracts/Comptroller.sol#L402):
+
+```java
+File: contracts/Comptroller.sol
+
+/// @audit borrowIndex()
+402:          for (uint256 i; i < rewardDistributorsCount; ++i) {
 ```
 
 <br>
